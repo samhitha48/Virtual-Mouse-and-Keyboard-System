@@ -1,6 +1,5 @@
 import cv2
 import mediapipe as mp
-import time
 import math
 
 class handDetector():
@@ -11,8 +10,7 @@ class handDetector():
         self.trackCon = trackCon
 
         self.mpHands = mp.solutions.hands
-        self.hands = self.mpHands.Hands(self.mode, self.maxHands,
-                                   self.detectionCon, self.trackCon)
+        self.hands = self.mpHands.Hands(self.mode, self.maxHands, self.detectionCon, self.trackCon)
         self.mpDraw = mp.solutions.drawing_utils
         self.tipIds = [4, 8, 12, 16, 20]
 
@@ -24,11 +22,10 @@ class handDetector():
         if self.results.multi_hand_landmarks:
             for handLms in self.results.multi_hand_landmarks:
                 if draw:
-                    self.mpDraw.draw_landmarks(img, handLms,
-                                               self.mpHands.HAND_CONNECTIONS)
-
+                    self.mpDraw.draw_landmarks(img, handLms, self.mpHands.HAND_CONNECTIONS)
         return img
 
+    
     def findPosition(self, img, handNo=0, draw= True ):
         xList = []
         yList = []
@@ -55,7 +52,7 @@ class handDetector():
                               (bbox[2]+20, bbox[3]+20), (0, 255, 0), 2)
 
         return self.lmList, bbox
-
+        
     def findDistance(self, p1, p2, img, draw=True):
 
         x1, y1 = self.lmList[p1][1], self.lmList[p1][2]
@@ -88,28 +85,18 @@ class handDetector():
                 fingers.append(0)
         return fingers
 
-def main():
-    pTime = 0
-    cTime = 0
-    cap = cv2.VideoCapture(0)
-    detector = handDetector()
-    while True:
-        success, img = cap.read()
-        img = detector.findHands(img)
-        lmList = detector.findPosition(img)
-        if len(lmList) !=0:
-            print(lmList[4])
-
-        cTime = time.time()
-        fps = 1 / (cTime - pTime)
-        pTime = cTime
-
-        cv2.putText(img, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3,
-                    (255, 0, 255), 3)
-
-        cv2.imshow("Image", img)
-        cv2.waitKey(1)
-
-
-if __name__ == "__main__":
-    main()
+def handle_mouse_event(event, x, y, flags, param):
+    global mouse_position, mouse_down, mouse_button
+    mouse_position = (x, y)
+    if event == cv2.EVENT_LBUTTONDOWN:
+        mouse_down = True
+        mouse_button = 'left'
+    elif event == cv2.EVENT_LBUTTONUP:
+        mouse_down = False
+        mouse_button = None
+    elif event == cv2.EVENT_RBUTTONDOWN:
+        mouse_down = True
+        mouse_button = True
+    elif event == cv2.EVENT_RBUTTONUP:
+        mouse_down = False
+        mouse_button = None
